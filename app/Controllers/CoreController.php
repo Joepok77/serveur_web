@@ -15,6 +15,7 @@ class CoreController
      */
     public function show($viewName, $viewData = [])
     {
+        extract($viewData);
         $absoluteURL = $_SERVER['BASE_URI'];
         global $router;
         // $typeModel = new Type();
@@ -37,8 +38,8 @@ class CoreController
         // // Ci dessous j'execute la methode findAll pour récupérer toutes les categories depuis la bdd
         // $brands = $brandModel->findAll();
 
-        require_once __DIR__ . "/../views/partials/header.tpl.php";
-        require_once __DIR__ . "/../views/$viewName.tpl.php";
-        require_once __DIR__ . "/../views/partials/footer.tpl.php";
+        require_once __DIR__ . "/../views/partials/header.php";
+        require_once __DIR__ . "/../views/$viewName.php";
+        require_once __DIR__ . "/../views/partials/footer.php";
     }
 }

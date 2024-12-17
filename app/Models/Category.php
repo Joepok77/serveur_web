@@ -13,52 +13,48 @@ class Category extends CoreModel
     private $home_order; // ordre d'affichage des catégories dans la page accueil
 
     /**
-     * Récupère toutes les catégories (table category) depuis la bdd
+     * Récupère toutes les catégories (table Category) depuis la bdd
      * Retourne une liste d'objet (instances de la classe Category => le model ou on est)
      */
     public function findAll()
     {
-        $sql = "SELECT * FROM category";
+        $sql = "SELECT * FROM Category ORDER BY name"; // "Category" en majuscule
+
         $pdo = Database::getPDO();
         $pdoStatement = $pdo->query($sql);
-        $categories = $pdoStatement->fetchAll(PDO::FETCH_CLASS, Category::class);
 
-        return $categories;
+        return $pdoStatement->fetchAll(PDO::FETCH_CLASS, Category::class);
     }
 
+
     /**
-     * Récupère une seul categorie en fonction de son id
+     * Récupère une seule catégorie en fonction de son id
      * Retourne un objet (une instance de la classe Category => le model ou on est)
      */
     public function find($id)
     {
-        // Ici on créer la requete SQL qui va récupérer le product en fonction de son id
-        $sql = "SELECT * FROM category WHERE id = ".$id;
+        // Ici on créer la requête SQL qui va récupérer la catégorie en fonction de son id
+        $sql = "SELECT * FROM Category WHERE id = ".$id; // "Category" en majuscule
 
-        // Ici $pdo est un objet de la classe Databse (Utils/Database.php)
-        // $pdo va me permettre d'executer mes requetes sql
         $pdo = Database::getPDO();
-
-        // ici j'execute ma requete sql ($sql) et je stock le resultat de cette requete dans $pdoStatement
         $pdoStatement = $pdo->query($sql);
 
-        // Je veux récuperer UN objet Product, PDO le fait pour moi => fetchObject (fetch qu'une seule fois + converti en objet de la classe 'Product' donc le model Product)
         $category = $pdoStatement->fetchObject(Category::class);
 
         return $category;
     }
 
     /**
-     * Récupère toutes les catégories qui ont un home_order > 0 et rangés dans l'ordre de home_order
+     * Récupère toutes les catégories qui ont un home_order > 0 et rangées dans l'ordre de home_order
      */
     public function findAllForHomePage()
     {
-        $sql = "SELECT * FROM category WHERE home_order > 0 ORDER BY home_order";
+        $sql = "SELECT * FROM Category WHERE home_order > 0 ORDER BY home_order"; // "Category" en majuscule
+
         $pdo = Database::getPDO();
         $pdoStatement = $pdo->query($sql);
-        $categories = $pdoStatement->fetchAll(PDO::FETCH_CLASS, Category::class);
 
-        return $categories;
+        return $pdoStatement->fetchAll(PDO::FETCH_CLASS, Category::class);
     }
 
     /**
@@ -69,11 +65,10 @@ class Category extends CoreModel
         return $this->name;
     }
 
-
     /**
      * Set the value of name
      *
-     * @return  self
+     * @return self
      */
     public function setName($name)
     {
@@ -81,7 +76,7 @@ class Category extends CoreModel
     }
 
     /**
-     * Get the value of name
+     * Get the value of subtitle
      */
     public function getSubtitle()
     {
@@ -89,9 +84,9 @@ class Category extends CoreModel
     }
 
     /**
-     * Set the value of name
+     * Set the value of subtitle
      *
-     * @return  self
+     * @return self
      */
     public function setSubtitle($subtitle)
     {
@@ -109,28 +104,28 @@ class Category extends CoreModel
     }
 
     /**
-    * Set the value of picture
-    *
-    * @return self
-    */ 
+     * Set the value of picture
+     *
+     * @return self
+     */
     public function setPicture($picture)
     {
         $this->picture = $picture;
     }
 
     /**
-    * Get the value of home_order
-    */ 
+     * Get the value of home_order
+     */
     public function getHome_order()
     {
         return $this->home_order;
     }
 
-      /**
-    * Set the value of home_order
-    *
-    * @return self
-    */ 
+    /**
+     * Set the value of home_order
+     *
+     * @return self
+     */
     public function setHome_order($home_order)
     {
         $this->home_order = $home_order;

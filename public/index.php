@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 // Ici j'inclus le fichier autoload.php car c'est grâce à ce fichier que je vais pouvoir inclure TOUTES mes dépendances composer (donc ce qu'il y a dans le dossier vendor)
 require_once __DIR__ . "/../vendor/autoload.php";
@@ -11,7 +14,10 @@ $router = new AltoRouter();
 
 // On fournit à AltoRouter la partie de l'URL à ne pa sprendre en compte pour faire la comparaison entre l'URL courante et l'url de la route
 // LA valeur de $_SERVER['BASE_URI'] est donnée par le fichier .htaccess. Elle correspond au chemin de la racine du site, ici se termine par public
-$router->setBasePath($_SERVER['BASE_URI']); // Je définis le chemin de base => ce par quoi mes routes vont commencer (localhost/.../public)
+//$router->setBasePath($_SERVER['BASE_URI']); // Je définis le chemin de base => ce par quoi mes routes vont commencer (localhost/.../public)
+if (!isset($_SERVER['BASE_URI'])) {
+    $_SERVER['BASE_URI'] = '/'; // Chemin de base par défaut
+}
 
 // Ici, je créer mes routes (https://altorouter.com/usage/mapping-routes.html)
 
@@ -26,10 +32,46 @@ $router->addRoutes(array(
         'controller' => MainController::class, // le namespace nom de la classe + le nom de la classe (concatenation) 
         'action' => 'legalMentions'
     ], 'legal-mentions'),
+
+    array('GET','/panier', [
+        'controller' => MainController::class, // le namespace nom de la classe + le nom de la classe (concatenation) 
+        'action' => 'panier'
+    ], 'panier'),
+
+    array('GET','/register', [
+        'controller' => MainController::class, // le namespace nom de la classe + le nom de la classe (concatenation) 
+        'action' => 'register'
+    ], 'register'),
+
+    array('GET','/login', [
+        'controller' => MainController::class, // le namespace nom de la classe + le nom de la classe (concatenation) 
+        'action' => 'login'
+    ], 'login'),
+
+    array('GET','/detail', [
+        'controller' => MainController::class, // le namespace nom de la classe + le nom de la classe (concatenation) 
+        'action' => 'detail'
+    ], 'detail'),
+
+    array('GET','/catalogue', [
+        'controller' => MainController::class, // le namespace nom de la classe + le nom de la classe (concatenation) 
+        'action' => 'catalogue'
+    ], 'catalogue'),
+
+    array('GET','/about', [
+        'controller' => MainController::class, // le namespace nom de la classe + le nom de la classe (concatenation) 
+        'action' => 'about'
+    ], 'about'),
+
+  
+
+    
+
+
     array('GET','/catalogue/categorie/[i:id]', [
         'controller' => CatalogController::class,
-        'action' => 'category'
-    ], 'catalog-category'),
+        'action' => 'Category'
+    ], 'catalog-Category'),
     array('GET','/catalogue/type/[i:id]', [
         'controller' => CatalogController::class,
         'action' => 'type'
@@ -40,8 +82,8 @@ $router->addRoutes(array(
     ], 'catalog-brand'),
     array('GET','/catalogue/produit/[i:id]', [
         'controller' => CatalogController::class,
-        'action' => 'product'
-    ], 'catalog-product'),
+        'action' => 'Product'
+    ], 'catalog-Product'),
     array('GET','/test', [
         'controller' => MainController::class,
         'action' => 'test'
@@ -68,4 +110,6 @@ if ($match != false) { // Ici je verifie si $match n'est pas = false
     // J'execute la methode $methodToUse() en lui passant le parametre $match['params'].
     // $match['params'] => array assoc qui contient toutes les données que je veux passer.
     $controller->$methodToUse($match['params']);
+
+    
 }
