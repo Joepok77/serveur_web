@@ -7,56 +7,60 @@
             <a href="?category_id=<?= $category->getId(); ?>">
                 <?= htmlspecialchars($category->getName()); ?>
             </a>
-        </li>
+            </li>
     <?php endforeach; ?>
 </ul>
 
+<!-- Affichage des produits en fonction de la catégorie sélectionnée -->
 <h2>Produits</h2>
-<?php if (!empty($products)): ?>
-    <h2>Produits</h2>
-    <?php foreach ($products as $product): ?>
-        <!-- Si un produit est sélectionné, affiche les détails -->
-        <?php if (isset($_GET['product_id']) && $_GET['product_id'] == $product->getId()): ?>
-            <h3><?= htmlspecialchars($product->getName()) ?></h3>
-            <p><?= htmlspecialchars($product->getDescription()) ?></p>
-            <img src="<?= htmlspecialchars($product->getPicture()) ?>" alt="<?= htmlspecialchars($product->getName()) ?>" style="max-width: 200px; height: auto;">
-            <p>Prix : <?= htmlspecialchars($product->getPrice()) ?> €</p>
+<?php 
 
-            <!-- Bouton Ajouter au panier -->
-            <form action="panier.php" method="POST" style="display:inline;">
-                <input type="hidden" name="product_id" value="<?= $product->getId() ?>">
-                <input type="hidden" name="product_name" value="<?= htmlspecialchars($product->getName()) ?>">
-                <input type="hidden" name="product_price" value="<?= htmlspecialchars($product->getPrice()) ?>">
-                <button type="submit">Ajouter au panier</button>
-            </form>
+if (!empty($selected_category) && !empty($products)): ?>
+    <p>Produits dans la catégorie : <strong><?= htmlspecialchars($categories[array_search($selected_category, array_column($categories, 'id'))]->name) ?></strong></p>
+    <?php 
+    foreach ($products as $product): ?>
+       
+        <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+        <h3><?= htmlspecialchars($product->getName()) ?></h3>
+            <img src="assets/images/macbookpro.jpeg.jpeg" 
+                 alt="Image du produit" 
+                 style="max-width: 150px; height: auto;">
+                 <p>Prix : <?= htmlspecialchars($product->getPrice()) ?> €</p>
+            
+       
 
-            <!-- Bouton Retour vers la catégorie -->
-            <a href="catalogue.php?category_id=<?= htmlspecialchars($_GET['category_id']) ?>">
-                <button>Retour</button>
+
+
+            <!-- Lien vers les détails du produit -->
+            <a href="?category_id=<?= $selected_category ?>&product_id=<?= $product->id ?>">
+                <button>Voir le produit</button>
             </a>
 
-        <?php else: ?>
-            <!-- Affichage général des produits avec le lien Voir le produit -->
-            <div>
-                <h3><?= htmlspecialchars($product->getName()) ?></h3>
-                <img src="<?= htmlspecialchars($product->getPicture()) ?>" alt="<?= htmlspecialchars($product->getName()) ?>" style="max-width: 150px; height: auto;">
-                <p>Prix : <?= htmlspecialchars($product->getPrice()) ?> €</p>
-                
-                <!-- Bouton Voir le produit -->
-                <a href="index.php?route=detail&product_id=<?= $product->getId(); ?>">
-                    <button>Voir le produit</button>
-                </a>
-
-                <!-- Bouton Ajouter au panier -->
-                <form action="index.php?route=panier" method="POST" style="display:inline;">
-                    <input type="hidden" name="product_id" value="<?= $product->getId() ?>">
-                    <input type="hidden" name="product_name" value="<?= htmlspecialchars($product->getName()) ?>">
-                    <input type="hidden" name="product_price" value="<?= htmlspecialchars($product->getPrice()) ?>">
-                    <button type="submit">Ajouter au panier</button>
-                </form>
-            </div>
-        <?php endif; ?>
+            <!-- Formulaire pour ajouter au panier -->
+            <form action="index.php?route=panier" method="POST">
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="product_id" value="<?= $product->id ?>">
+                <input type="hidden" name="product_name" value="<?= htmlspecialchars($product->name) ?>">
+                <input type="hidden" name="product_price" value="<?= htmlspecialchars($product->price) ?>">
+                <button type="submit">Ajouter au panier</button>
+            </form>
+        </div>
     <?php endforeach; ?>
-<?php else: ?>
+<?php elseif (!empty($selected_category)): ?>
     <p>Aucun produit trouvé pour cette catégorie.</p>
+<?php else: ?>
+    <p>Sélectionnez une catégorie pour afficher ses produits.</p>
+<?php endif; ?>
+
+<!-- Affichage des détails d'un produit si sélectionné -->
+<?php if (!empty($productDetails)): ?>
+    <h2>Détails du produit</h2>
+    <div>
+        <h3><?= htmlspecialchars($productDetails->name) ?></h3>
+        <img src="assets/images/macbookpro.jpeg" 
+             alt="Image du produit" 
+             style="max-width: 150px; height: auto;">
+        <p>Prix : <?= htmlspecialchars($productDetails->price) ?> €</p>
+        <p>Description : <?= htmlspecialchars($productDetails->description) ?></p>
+    </div>
 <?php endif; ?>

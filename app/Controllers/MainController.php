@@ -1,13 +1,16 @@
 <?php
 
 namespace App\Controllers;
-
+use App\Utils\Database;
 
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Type;
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 class MainController extends CoreController
 {
@@ -38,13 +41,15 @@ class MainController extends CoreController
       // Page "catalogue"
       public function catalogue()
       {
+    
+
           $categoryModel = new Category();
           $categories = $categoryModel->findAll();
       
           $products = [];
           $productDetails = null;
           $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
-      
+        
           // Gérer l'état de "désélection"
           if (session_status() === PHP_SESSION_NONE) {
               session_start();
@@ -59,6 +64,9 @@ class MainController extends CoreController
               if ($categoryId) {
                   $productModel = new Product();
                   $products = $productModel->findByCategory($categoryId);
+                  
+
+
               }
           }
       
@@ -74,14 +82,9 @@ class MainController extends CoreController
               'products' => $products,
               'selected_category' => $categoryId,
               'productDetails' => $productDetails
+              
           ]);
       }
-      
-
-      
-      
-      
-      
   
 
     /**
@@ -93,33 +96,166 @@ class MainController extends CoreController
         $this->show('mentions');
     }
 
-
-
     // Page "About"
     public function about()
     {
         $this->show('about');
     }
 
-    // Page "panier"
-    public function panier()
-    {
-        $this->show('panier');
+    public function panier() {
+        error_log("Méthode panier appelée");
+    
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    
+        // Vérifiez si le panier existe
+        if (!isset($_SESSION['panier'])) {
+            $_SESSION['panier'] = [];
+        }
+    
+        // Récupération des données POST
+        error_log("Données POST reçues : " . json_encode($_POST));
+    
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? 'view';
+            error_log("Action : " . $action);
+    
+            switch ($action) {
+                case 'add':
+                    $productId = $_POST['product_id'] ?? null;
+                    $productName = $_POST['product_name'] ?? null;
+                    $productPrice = $_POST['product_price'] ?? null;
+    
+                    if (!$productId || !$productName || !$productPrice) {
+                        error_log("Données invalides pour ajout : ID=$productId, Nom=$productName, Prix=$productPrice");
+                        throw new Exception("Données invalides pour l'ajout au panier.");
+                    }
+    
+                    // Ajouter au panier
+                    $found = false;
+                    foreach ($_SESSION['panier'] as &$item) {
+                        if ($item['id'] == $productId) {
+                            $item['quantity']++;
+                            $found = true;
+                            break;
+                        }
+                    }
+    
+                    if (!$found) {
+                        $_SESSION['panier'][] = [
+                            'id' => $productId,
+                            'name' => $productName,
+                            'price' => $productPrice,
+                            'quantity' => 1,
+                        ];
+                    }
+    
+                    error_log("Produit ajouté au panier : " . json_encode($_SESSION['panier']));
+                    break;
+    
+                case 'view':
+                default:
+                    error_log("Affichage du panier : " . json_encode($_SESSION['panier']));
+                    break;
+            }
+        }
+    
+        $this->show('panier', ['panier' => $_SESSION['panier']]);
     }
-
+     
     // Page "register"
     public function register()
     {
-        $this->show('register');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Traitement des données soumises
+            $nom = htmlspecialchars(trim($_POST['username']));
+            $email = htmlspecialchars(trim($_POST['email']));
+            $password = htmlspecialchars(trim($_POST['password']));
+
+            if (empty($nom) || empty($email) || empty($password)) {
+                $error = "Veuillez remplir tous les champs.";
+            } else {
+                $pdo = Database::getPDO();
+                $stmt = $pdo->prepare("SELECT id FROM utilisateurs WHERE email = :email");
+                $stmt->execute(['email' => $email]);
+                $existingUser = $stmt->fetch();
+
+                if ($existingUser) {
+                    $error = "L'email est déjà utilisé.";
+                } else {
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                    $stmt = $pdo->prepare("INSERT INTO utilisateurs (nom, email, password) VALUES (:nom, :email, :password)");
+                    $stmt->execute([
+                        'nom' => $nom,
+                        'email' => $email,
+                        'password' => $hashed_password
+                    ]);
+
+                    header("Location: /login");
+                    exit;
+                }
+            }
+
+            // Réaffiche la vue avec les erreurs
+            $this->show('register', ['error' => $error ?? null]);
+        } else {
+            // Affiche simplement la vue pour les requêtes GET
+            $this->show('register');
+        }
+    
+
+
     }
 
     // Page "login"
     public function login()
-    {
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Récupération des données envoyées par le formulaire
+        $email = htmlspecialchars(trim($_POST['email']));
+        $password = htmlspecialchars(trim($_POST['password']));
+
+        if (empty($email) || empty($password)) {
+            $error = "Veuillez remplir tous les champs.";
+        } else {
+            // Connexion à la base de données
+            $pdo = \App\Utils\Database::getPDO();
+
+            // Recherche de l'utilisateur avec l'email
+            $stmt = $pdo->prepare("SELECT id, nom, password FROM utilisateurs WHERE email = :email");
+            $stmt->execute(['email' => $email]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                // Démarrage de la session et stockage des informations utilisateur
+                session_start();
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['nom'];
+
+                // Redirection vers une page protégée ou le tableau de bord
+                header("Location: /");
+                exit;
+            } else {
+                $error = "Email ou mot de passe incorrect.";
+            }
+        }
+
+        // Si une erreur existe, on la passe à la vue
+        $this->show('login', ['error' => $error ?? null]);
+    } else {
+        // Affiche la vue pour les requêtes GET
         $this->show('login');
     }
+}
 
-
+public function logout()
+{
+    session_start();
+    session_destroy(); // Détruit toutes les données de session
+    header("Location: /"); // Redirige vers l'accueil
+    exit;
+}
 
     // Page "detail"
     public function detail()

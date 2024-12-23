@@ -1,52 +1,37 @@
-<?php
-session_start();
+<h1>Votre Panier</h1>
 
-if (!isset($_SESSION['panier'])) {
-    $_SESSION['panier'] = [];
-}
+<?php 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Ajouter un produit au panier si les données sont envoyées
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $product = [
-        'id' => $_POST['product_id'],
-        'name' => $_POST['product_name'],
-        'price' => $_POST['product_price'],
-        'quantity' => 1, // Par défaut, on ajoute 1 produit
-    ];
+if (!empty($_SESSION['panier'])): ?>
+    <ul>
+        <?php foreach ($_SESSION['panier'] as $index => $item): ?>
+            <li>
+                <?= htmlspecialchars($item['name']) ?> - 
+                <?= $item['quantity'] ?> x <?= number_format($item['price'], 2) ?> €
 
-    // Ajouter le produit au panier
-    $_SESSION['panier'][] = $product;
+                <!-- Bouton pour ajouter une unité -->
+<form action="index.php?route=panier_modifier" method="POST" style="display:inline;">
+    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="product_index" value="<?= $index ?>">
+    <button type="submit">+</button>
+</form>
 
-    // Redirection pour éviter le renvoi du formulaire
-    header('Location: panier.php');
-    exit;
-}
+<!-- Bouton pour retirer une unité -->
+<form action="index.php?route=panier_modifier" method="POST" style="display:inline;">
+    <input type="hidden" name="action" value="remove">
+    <input type="hidden" name="product_index" value="<?= $index ?>">
+    <button type="submit">-</button>
+</form>
 
-// Afficher le panier
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Panier</title>
-</head>
-<body>
-    <h1>Votre Panier</h1>
-
-    <?php if (!empty($_SESSION['panier'])): ?>
-        <ul>
-            <?php foreach ($_SESSION['panier'] as $item): ?>
-                <li>
-                    <?= htmlspecialchars($item['name']) ?> - 
-                    <?= htmlspecialchars($item['price']) ?> € - 
-                    Quantité : <?= $item['quantity'] ?>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php else: ?>
-        <p>Votre panier est vide.</p>
-    <?php endif; ?>
-
-    <a href="catalogue.php">Retour au catalogue</a>
-</body>
-</html>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+    <p>Total : <?= number_format(array_sum(array_map(function($item) {
+        return $item['price'] * $item['quantity'];
+    }, $_SESSION['panier'])), 2) ?> €</p>
+<?php else: ?>
+    <p>Votre panier est vide.</p>
+<?php endif; ?>

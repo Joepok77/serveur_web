@@ -15,8 +15,8 @@ class CoreController
      */
     public function show($viewName, $viewData = [])
     {
-        extract($viewData);
         $absoluteURL = $_SERVER['BASE_URI'];
+        global $router;
         global $router;
         // $typeModel = new Type();
         // $types = $typeModel->findAll();

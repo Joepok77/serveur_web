@@ -1,15 +1,19 @@
+
 <main class="main-content">
-        <h2>Connexion</h2>
-        <form action="#" method="post">
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email" required>
+    <h1>Connexion</h1>
+    <!-- Affichage des erreurs -->
+    <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
 
-            <label for="password">Mot de passe :</label>
-            <input type="password" id="password" name="password" required>
+    <!-- Formulaire de connexion -->
+    <form action="#" method="post">
+        <label for="email">Adresse Email :</label><br>
+        <input type="email" name="email" id="email" placeholder="Votre email" required><br>
+        <label for="password">Mot de Passe :</label><br>
+        <input type="password" name="password" id="password" placeholder="Votre mot de passe" required><br>
+        <button type="submit">Se connecter</button>
+    </form>
+    <p>Pas encore de compte ? <a href="/register">S'inscrire</a></p>
 
-            <button type="submit" class="btn">Se connecter</button>
-        </form>
-        <p>Pas encore de compte ? <a href="/register">S'inscrire</a></p>
-    </main>
+    <a href="/">Retour à l'accueil</a>
 </body>
 </html>

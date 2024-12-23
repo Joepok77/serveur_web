@@ -54,6 +54,14 @@ header .nav ul li a {
 header .nav ul li a:hover {
     color: #e94560;
 }
+header .user-welcome {
+    flex: 1; /* Prend un tiers de la largeur totale du header */
+    text-align: center; /* Centre le texte horizontalement */
+    color: #f8f6f6; /* Donne une couleur rouge identique à celle du logo */
+    font-size: 1.2rem; /* Taille du texte légèrement augmentée */
+    font-weight: 500; /* Poids de police intermédiaire pour une bonne lisibilité */
+}
+
 
 .hero {
     text-align: center;
