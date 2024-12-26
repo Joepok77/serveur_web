@@ -9,6 +9,12 @@ use App\Models\Type;
 
 class CoreController 
 {
+
+    public function __construct() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
     /**
      * Fonction qui permet d'afficher la vue
      * $viewData = les données que je veux récupérer dans ma vue
@@ -16,9 +22,13 @@ class CoreController
     public function show($viewName, $viewData = [])
     {
         extract($viewData);
+      
         $absoluteURL = $_SERVER['BASE_URI'];
         global $router;
         global $router;
+
+      
+        
         // $typeModel = new Type();
         // $types = $typeModel->findAll();
 

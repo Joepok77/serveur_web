@@ -27,21 +27,18 @@
                 <!-- Boutons -->
                 <div style="margin-top: 10px;">
                     <!-- Bouton Voir le produit -->
-                    <a href="detail.php?product_id=<?= $product->getId() ?>">
+                    <a href="/detail?product_id=<?= $product->getId() ?>">
                         <button style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
                             Voir le produit
                         </button>
                     </a>
 
                     <!-- Bouton Ajouter au panier -->
-                    <form action="panier.php" method="POST" style="display: inline;">
-                        <input type="hidden" name="product_id" value="<?= $product->getId() ?>">
-                        <input type="hidden" name="product_name" value="<?= htmlspecialchars($product->getName()) ?>">
-                        <input type="hidden" name="product_price" value="<?= htmlspecialchars($product->getPrice()) ?>">
-                        <button type="submit" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <a href="/panier?action=add&product_id=<?= $product->getId() ?>&product_name=<?= urlencode($product->getName()) ?>&product_price=<?= $product->getPrice() ?>&product_picture=<?= urlencode($product->getPicture()) ?>">
+                        <button style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
                             Ajouter au panier
                         </button>
-                    </form>
+                    </a>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -70,22 +67,18 @@
                 <!-- Boutons -->
                 <div style="margin-top: 10px;">
                     <!-- Bouton Voir le produit -->
-                    <a href="detail.php?product_id=<?= $product->getId() ?>">
-
+                    <a href="/detail?product_id=<?= $product->getId() ?>">
                         <button style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
                             Voir le produit
                         </button>
                     </a>
 
                     <!-- Bouton Ajouter au panier -->
-                    <form action="panier.php" method="POST" style="display: inline;">
-                        <input type="hidden" name="product_id" value="<?= $product->getId() ?>">
-                        <input type="hidden" name="product_name" value="<?= htmlspecialchars($product->getName()) ?>">
-                        <input type="hidden" name="product_price" value="<?= htmlspecialchars($product->getPrice()) ?>">
-                        <button type="submit" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <a href="/panier?action=add&product_id=<?= $product->getId() ?>&product_name=<?= urlencode($product->getName()) ?>&product_price=<?= $product->getPrice() ?>&product_picture=<?= urlencode($product->getPicture()) ?>">
+                        <button style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
                             Ajouter au panier
                         </button>
-                    </form>
+                    </a>
                 </div>
             </div>
         <?php endforeach; ?>

@@ -61,10 +61,6 @@ class MainController extends CoreController
             $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
         
             // Gérer l'état de "désélection"
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-        
             if (isset($_SESSION['selected_category']) && $_SESSION['selected_category'] == $categoryId) {
                 unset($_SESSION['selected_category']);
             } else {
@@ -125,67 +121,85 @@ class MainController extends CoreController
     }
 
     public function panier() {
-        error_log("Méthode panier appelée");
-    
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-    
-        // Vérifiez si le panier existe
-        if (!isset($_SESSION['panier'])) {
-            $_SESSION['panier'] = [];
-        }
-    
-        // Récupération des données POST
-        error_log("Données POST reçues : " . json_encode($_POST));
-    
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $action = $_POST['action'] ?? 'view';
-            error_log("Action : " . $action);
-    
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $action = $_GET['action'] ?? null;
+
             switch ($action) {
                 case 'add':
-                    $productId = $_POST['product_id'] ?? null;
-                    $productName = $_POST['product_name'] ?? null;
-                    $productPrice = $_POST['product_price'] ?? null;
-    
-                    if (!$productId || !$productName || !$productPrice) {
-                        error_log("Données invalides pour ajout : ID=$productId, Nom=$productName, Prix=$productPrice");
-                        throw new Exception("Données invalides pour l'ajout au panier.");
-                    }
-    
-                    // Ajouter au panier
-                    $found = false;
-                    foreach ($_SESSION['panier'] as &$item) {
-                        if ($item['id'] == $productId) {
-                            $item['quantity']++;
-                            $found = true;
-                            break;
+                    $productId = intval($_GET['product_id'] ?? 0);
+                    $productName = htmlspecialchars($_GET['product_name'] ?? '');
+                    $productPrice = floatval($_GET['product_price'] ?? 0);
+                    $productPicture = htmlspecialchars($_GET['product_picture'] ?? 'default.jpg');
+
+                    if ($productId > 0 && $productName && $productPrice > 0) {
+                        if (!isset($_SESSION['panier'])) {
+                            $_SESSION['panier'] = [];
+                        }
+
+                        $found = false;
+                        foreach ($_SESSION['panier'] as &$item) {
+                            if ($item['id'] === $productId) {
+                                $item['quantity']++;
+                                $found = true;
+                                break;
+                            }
+                        }
+
+                        if (!$found) {
+                            $_SESSION['panier'][] = [
+                                'id' => $productId,
+                                'name' => $productName,
+                                'price' => $productPrice,
+                                'quantity' => 1,
+                                'image' => $productPicture,
+                            ];
                         }
                     }
-    
-                    if (!$found) {
-                        $_SESSION['panier'][] = [
-                            'id' => $productId,
-                            'name' => $productName,
-                            'price' => $productPrice,
-                            'quantity' => 1,
-                        ];
+
+                    header("Location: /panier");
+                    exit();
+
+                case 'remove':
+                    $productId = intval($_GET['product_id'] ?? 0);
+                    if ($productId > 0 && isset($_SESSION['panier'])) {
+                        foreach ($_SESSION['panier'] as $index => $item) {
+                            if ($item['id'] === $productId) {
+                                unset($_SESSION['panier'][$index]);
+                                $_SESSION['panier'] = array_values($_SESSION['panier']);
+                                break;
+                            }
+                        }
                     }
-    
-                    error_log("Produit ajouté au panier : " . json_encode($_SESSION['panier']));
-                    break;
-    
-                case 'view':
-                default:
-                    error_log("Affichage du panier : " . json_encode($_SESSION['panier']));
-                    break;
+                    header("Location: /panier");
+                    exit();
+
+                case 'update':
+                    $productId = intval($_GET['product_id'] ?? 0);
+                    $quantity = intval($_GET['quantity'] ?? 0);
+
+                    if ($productId > 0 && $quantity > 0 && isset($_SESSION['panier'])) {
+                        foreach ($_SESSION['panier'] as &$item) {
+                            if ($item['id'] === $productId) {
+                                $item['quantity'] = $quantity;
+                                break;
+                            }
+                        }
+                    }
+                    header("Location: /panier");
+                    exit();
             }
         }
-    
-        $this->show('panier', ['panier' => $_SESSION['panier']]);
+
+        $cart = $_SESSION['panier'] ?? [];
+
+        $this->show('panier', ['panier' => $cart]);
     }
-     
+
+    
     // Page "register"
     public function register()
     {
@@ -219,16 +233,16 @@ class MainController extends CoreController
                 }
             }
 
-            // Réaffiche la vue avec les erreurs
+           
             $this->show('register', ['error' => $error ?? null]);
         } else {
-            // Affiche simplement la vue pour les requêtes GET
+            
             $this->show('register');
         }
     
 
-
     }
+    
 
     // Page "login"
     public function login()
@@ -241,7 +255,7 @@ class MainController extends CoreController
         if (empty($email) || empty($password)) {
             $error = "Veuillez remplir tous les champs.";
         } else {
-            // Connexion à la base de données
+            
             $pdo = \App\Utils\Database::getPDO();
 
             // Recherche de l'utilisateur avec l'email
@@ -251,11 +265,11 @@ class MainController extends CoreController
 
             if ($user && password_verify($password, $user['password'])) {
                 // Démarrage de la session et stockage des informations utilisateur
-                session_start();
+             
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['nom'];
 
-                // Redirection vers une page protégée ou le tableau de bord
+               
                 header("Location: /");
                 exit;
             } else {
@@ -263,18 +277,18 @@ class MainController extends CoreController
             }
         }
 
-        // Si une erreur existe, on la passe à la vue
+      
         $this->show('login', ['error' => $error ?? null]);
     } else {
-        // Affiche la vue pour les requêtes GET
+       
         $this->show('login');
     }
 }
 
 public function logout()
 {
-    session_start();
-    session_destroy(); // Détruit toutes les données de session
+   
+    session_destroy(); 
     header("Location: /"); // Redirige vers l'accueil
     exit;
 }

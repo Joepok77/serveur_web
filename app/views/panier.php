@@ -1,37 +1,64 @@
-<h1>Votre Panier</h1>
+<h2>Votre panier</h2>
+<?php
+ if (!empty($panier)): ?>
+    <table border="1" cellspacing="0" cellpadding="10" style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prix</th>
+                <th>Quantité</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+            $totalPrice = 0;
+            foreach ($panier as $item): 
+                $totalPrice += $item['price'] * $item['quantity'];
+            ?>
+                <tr>
+                    <td><?= htmlspecialchars($item['name']) ?></td>
+                    <td><?= htmlspecialchars(number_format($item['price'], 2)) ?> €</td>
+                    <td>
+                        <a href="/panier?action=update&product_id=<?= $item['id'] ?>&quantity=<?= $item['quantity'] - 1 ?>" 
+                           <?= $item['quantity'] <= 1 ? 'style="pointer-events: none; color: gray;"' : '' ?>>-</a>
+                        <span style="margin: 0 10px;"><?= $item['quantity'] ?></span>
+                        <a href="/panier?action=update&product_id=<?= $item['id'] ?>&quantity=<?= $item['quantity'] + 1 ?>">+</a>
+                    </td>
+                    <td><?= htmlspecialchars(number_format($item['price'] * $item['quantity'], 2)) ?> €</td>
+                    <td>
+                        <a href="/panier?action=remove&product_id=<?= $item['id'] ?>" style="color: red;">Supprimer</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 
-<?php 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+    <div style="margin-top: 20px; text-align: right;">
+        <strong>Prix total : <?= htmlspecialchars(number_format($totalPrice, 2)) ?> €</strong>
+    </div>
 
-if (!empty($_SESSION['panier'])): ?>
-    <ul>
-        <?php foreach ($_SESSION['panier'] as $index => $item): ?>
-            <li>
-                <?= htmlspecialchars($item['name']) ?> - 
-                <?= $item['quantity'] ?> x <?= number_format($item['price'], 2) ?> €
+    <!-- Boutons -->
+    <div style="margin-top: 20px;">
+        <a href="/panier?action=validate">
+            <button style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Valider le panier
+            </button>
+        </a>
 
-                <!-- Bouton pour ajouter une unité -->
-<form action="index.php?route=panier_modifier" method="POST" style="display:inline;">
-    <input type="hidden" name="action" value="add">
-    <input type="hidden" name="product_index" value="<?= $index ?>">
-    <button type="submit">+</button>
-</form>
+        <a href="/">
+            <button style="padding: 10px 15px; background-color: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                Retour à l'accueil
+            </button>
+        </a>
 
-<!-- Bouton pour retirer une unité -->
-<form action="index.php?route=panier_modifier" method="POST" style="display:inline;">
-    <input type="hidden" name="action" value="remove">
-    <input type="hidden" name="product_index" value="<?= $index ?>">
-    <button type="submit">-</button>
-</form>
-
-            </li>
-        <?php endforeach; ?>
-    </ul>
-    <p>Total : <?= number_format(array_sum(array_map(function($item) {
-        return $item['price'] * $item['quantity'];
-    }, $_SESSION['panier'])), 2) ?> €</p>
+        <a href="/catalogue">
+            <button style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                Retour au catalogue
+            </button>
+        </a>
+    </div>
 <?php else: ?>
     <p>Votre panier est vide.</p>
 <?php endif; ?>
