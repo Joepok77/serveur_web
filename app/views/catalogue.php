@@ -1,66 +1,93 @@
-<h1>Catalogue des Produits</h1>
+<h1>Catégories des produits</h1>
 
-<h2>Catégories</h2>
-<ul>
-    <?php foreach ($categories as $category) : ?>
-        <li>
-            <a href="?category_id=<?= $category->getId(); ?>">
-                <?= htmlspecialchars($category->getName()); ?>
-            </a>
-            </li>
+<div style="margin-bottom: 20px;">
+    <?php foreach ($categories as $category): ?>
+        <form action="" method="GET" style="display: inline;">
+            <input type="hidden" name="category_id" value="<?= $category->getId() ?>">
+            <button type="submit" style="padding: 10px 15px; margin: 5px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <?= htmlspecialchars($category->getName()) ?>
+            </button>
+        </form>
     <?php endforeach; ?>
-</ul>
+</div>
 
-<!-- Affichage des produits en fonction de la catégorie sélectionnée -->
-<h2>Produits</h2>
-<?php 
+<?php if ($selected_category): ?>
+    <h2>Produits par catégorie</h2>
+    <?php if (!empty($products)): ?>
+        <p>Produits dans la catégorie : <strong><?= htmlspecialchars($categories[array_search($selected_category, array_column($categories, 'id'))]->getName()) ?></strong></p>
+        <?php foreach ($products as $product): ?>
+            <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                <h3><?= htmlspecialchars($product->getName()) ?></h3>
+                <p><?= htmlspecialchars($product->getDescription()) ?></p>
+                <img src="assets/images/<?= htmlspecialchars($product->getPicture()) ?>" 
+                     alt="<?= htmlspecialchars($product->getName()) ?>" 
+                     style="max-width: 150px; height: auto;">
+                <p>Prix : <?= htmlspecialchars($product->getPrice()) ?> €</p>
 
-if (!empty($selected_category) && !empty($products)): ?>
-    <p>Produits dans la catégorie : <strong><?= htmlspecialchars($categories[array_search($selected_category, array_column($categories, 'id'))]->name) ?></strong></p>
-    <?php 
-    foreach ($products as $product): ?>
-       
-        <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-        <h3><?= htmlspecialchars($product->getName()) ?></h3>
-            <img src="assets/images/macbookpro.jpeg.jpeg" 
-                 alt="Image du produit" 
-                 style="max-width: 150px; height: auto;">
-                 <p>Prix : <?= htmlspecialchars($product->getPrice()) ?> €</p>
-            
-       
+                <!-- Boutons -->
+                <div style="margin-top: 10px;">
+                    <!-- Bouton Voir le produit -->
+                    <a href="detail.php?product_id=<?= $product->getId() ?>">
+                        <button style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Voir le produit
+                        </button>
+                    </a>
 
+                    <!-- Bouton Ajouter au panier -->
+                    <form action="panier.php" method="POST" style="display: inline;">
+                        <input type="hidden" name="product_id" value="<?= $product->getId() ?>">
+                        <input type="hidden" name="product_name" value="<?= htmlspecialchars($product->getName()) ?>">
+                        <input type="hidden" name="product_price" value="<?= htmlspecialchars($product->getPrice()) ?>">
+                        <button type="submit" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Ajouter au panier
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>Aucun produit trouvé pour cette catégorie.</p>
+    <?php endif; ?>
 
-
-            <!-- Lien vers les détails du produit -->
-            <a href="?category_id=<?= $selected_category ?>&product_id=<?= $product->id ?>">
-                <button>Voir le produit</button>
-            </a>
-
-            <!-- Formulaire pour ajouter au panier -->
-            <form action="index.php?route=panier" method="POST">
-                <input type="hidden" name="action" value="add">
-                <input type="hidden" name="product_id" value="<?= $product->id ?>">
-                <input type="hidden" name="product_name" value="<?= htmlspecialchars($product->name) ?>">
-                <input type="hidden" name="product_price" value="<?= htmlspecialchars($product->price) ?>">
-                <button type="submit">Ajouter au panier</button>
-            </form>
-        </div>
-    <?php endforeach; ?>
-<?php elseif (!empty($selected_category)): ?>
-    <p>Aucun produit trouvé pour cette catégorie.</p>
+    <!-- Bouton Retour au catalogue -->
+    <form action="" method="GET">
+        <button type="submit" style="padding: 10px 15px; margin: 5px; background-color: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Retour au catalogue
+        </button>
+    </form>
 <?php else: ?>
-    <p>Sélectionnez une catégorie pour afficher ses produits.</p>
-<?php endif; ?>
+    <h2>Tous les produits</h2>
+    <section class="produits">
+        <?php foreach ($allProducts as $product): ?>
+            <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                <h3><?= htmlspecialchars($product->getName()) ?></h3>
+                <p><?= htmlspecialchars($product->getDescription()) ?></p>
+                <img src="assets/images/<?= htmlspecialchars($product->getPicture()) ?>" 
+                     alt="<?= htmlspecialchars($product->getName()) ?>" 
+                     style="max-width: 150px; height: auto;">
+                <p>Prix : <?= htmlspecialchars($product->getPrice()) ?> €</p>
 
-<!-- Affichage des détails d'un produit si sélectionné -->
-<?php if (!empty($productDetails)): ?>
-    <h2>Détails du produit</h2>
-    <div>
-        <h3><?= htmlspecialchars($productDetails->name) ?></h3>
-        <img src="assets/images/macbookpro.jpeg" 
-             alt="Image du produit" 
-             style="max-width: 150px; height: auto;">
-        <p>Prix : <?= htmlspecialchars($productDetails->price) ?> €</p>
-        <p>Description : <?= htmlspecialchars($productDetails->description) ?></p>
-    </div>
+                <!-- Boutons -->
+                <div style="margin-top: 10px;">
+                    <!-- Bouton Voir le produit -->
+                    <a href="detail.php?product_id=<?= $product->getId() ?>">
+
+                        <button style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Voir le produit
+                        </button>
+                    </a>
+
+                    <!-- Bouton Ajouter au panier -->
+                    <form action="panier.php" method="POST" style="display: inline;">
+                        <input type="hidden" name="product_id" value="<?= $product->getId() ?>">
+                        <input type="hidden" name="product_name" value="<?= htmlspecialchars($product->getName()) ?>">
+                        <input type="hidden" name="product_price" value="<?= htmlspecialchars($product->getPrice()) ?>">
+                        <button type="submit" style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Ajouter au panier
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </section>
 <?php endif; ?>

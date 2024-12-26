@@ -41,51 +41,73 @@ class MainController extends CoreController
       // Page "catalogue"
       public function catalogue()
       {
-    
-
-          $categoryModel = new Category();
-          $categories = $categoryModel->findAll();
-      
-          $products = [];
-          $productDetails = null;
-          $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
         
-          // Gérer l'état de "désélection"
-          if (session_status() === PHP_SESSION_NONE) {
-              session_start();
-          }
-      
-          if (isset($_SESSION['selected_category']) && $_SESSION['selected_category'] == $categoryId) {
-              unset($_SESSION['selected_category']);
-          } else {
-              $_SESSION['selected_category'] = $categoryId;
-      
-              // Récupérer les produits pour la catégorie sélectionnée
-              if ($categoryId) {
-                  $productModel = new Product();
-                  $products = $productModel->findByCategory($categoryId);
-                  
+            // Récupérer les catégories
+            $categoryModel = new Category();
+            $categories = $categoryModel->findAll();
+            
+
+        
+            // Récupérer tous les produits
+            $productModel = new Product();
+            $allProducts = $productModel->findAll();
+          
 
 
-              }
-          }
+        
+            // Produits filtrés par catégorie
+            $products = [];
+            $productDetails = null;
+            $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
+        
+            // Gérer l'état de "désélection"
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+        
+            if (isset($_SESSION['selected_category']) && $_SESSION['selected_category'] == $categoryId) {
+                unset($_SESSION['selected_category']);
+            } else {
+                $_SESSION['selected_category'] = $categoryId;
+        
+                // Récupérer les produits pour la catégorie sélectionnée
+                if ($categoryId) {
+                    $products = $productModel->findByCategory($categoryId);
+                }
+            }
+        
+            // Vérifie si un produit est sélectionné
+            if (!empty($_GET['product_id'])) {
+                $productId = (int) $_GET['product_id'];
+                $productDetails = $productModel->find($productId);
+            }
+        
+            // Transmettre les données à la vue
+            $this->show('catalogue', [
+                'categories' => $categories,
+                'products' => $products,
+                'selected_category' => $categoryId,
+                'productDetails' => $productDetails,
+                'allProducts' => $allProducts, // Transmet tous les produits à la vue
+            ]);
+        }
+           
+      public function productList()
+      {
+          // Crée une instance du modèle Product
+          $productModel = new Product();
       
-          // Vérifie si un produit est sélectionné
-          if (!empty($_GET['product_id'])) {
-              $productId = (int) $_GET['product_id'];
-              $productModel = new Product();
-              $productDetails = $productModel->find($productId);
-          }
+          // Récupère tous les produits depuis la base de données
+          $products = $productModel->findAll();
       
-          $this->show('catalogue', [
-              'categories' => $categories,
-              'products' => $products,
-              'selected_category' => $categoryId,
-              'productDetails' => $productDetails
-              
+        
+      
+          // Transmet les produits récupérés à la vue 'product_list'
+          $this->show('product_list', [
+              'products' => $products // Tableau associatif contenant les produits
           ]);
       }
-  
+      
 
     /**
      * Show legal mentions page
